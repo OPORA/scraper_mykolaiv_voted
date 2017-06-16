@@ -7,18 +7,18 @@ class ReadFile
     page = yomu.text
 
      vote = {}
-     vote[:datetime] = page[/^від.+/].gsub(/від/,'').strip
-     unless page[/ГОЛОСУВАННЯ НЕ ПРОВОДИЛОСЬ/]
-       vote[:res] = page[/РІШЕННЯ.+/].strip
-     else
-       vote[:res] = "ГОЛОСУВАННЯ НЕ ПРОВОДИЛОСЬ"
-     end
+     vote[:datetime] = page[/від.+\d{2}\.\d{2}\.\d{4}/].gsub(/від/,'').strip
 
-     vote[:name] = page.split(/\n/).find{|str| str.strip[/^\d+\.\s/]}.strip.gsub(/^\d+\.\s/,'').strip
-     # vote[:number] = page.split(/\n/).find{|str| str.strip[/^\d+\.\s/]}.strip[/^\d+/]
-     vote[:voteds] = []
+     vote[:res] = page[/РІШЕННЯ.+/].strip
+
      paragraf =  page.gsub(/\n/, '\n')
-     paragraf[/Вибір.+(УСЬОГО:|ВСЬОГО:)/].gsub(/\s{2,}/, ' ').gsub(/(Вибір|УСЬОГО:|ВСЬОГО:)/,'').split(/\\n/).each do |v|
+
+     vote[:name] = paragraf[/місто Миколаїв.+Рішення ухвалює/].gsub(/(місто Миколаїв|від.+\d{2}\.\d{2}\.\d{4}|Рішення ухвалює|\\n|"|«|»|)/,'').gsub(/(\s{2,}|@�������ППр<џ�Ж…insrsid5901197)/,' ').strip
+     p vote[:name]
+     vote[:voteds] = []
+
+     paragraf[/По-батькові.+(УСЬОГО:|ВСЬОГО:)/].gsub(/\s{2,}/, ' ').gsub(/(По-батькові|Вибір|УСЬОГО:|ВСЬОГО:)/,'').split(/\\n/).each do |v|
+
        next if v.strip.size==0
        voted = v.strip
        if voted[/\d+/]

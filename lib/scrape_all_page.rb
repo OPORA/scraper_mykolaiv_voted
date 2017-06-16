@@ -7,17 +7,10 @@ class GetPages
   def initialize
     @all_page = []
     $all_mp = GetMp.new
-    url = "http://www.lutskrada.gov.ua/sesiyi-miskoyi-radi"
+    url = "https://mkrada.gov.ua/content/rezultati-golosuvannya-deputativ_2.html"
     page = GetPage.page(url)
-    check = nil
-    page.css('.even p').each do |p|
-      if p.text == "Міська рада 7-го скликання"
-        check = 1
-      end
-      next if check.nil?
-      next if p.text == "Міська рада 7-го скликання"
-      next if p.text == ""
-      @all_page << { cadent: p.text[/\(.+\)/].gsub(/(\(|\))/,''), url: p.css('a')[0][:href] }
+    page.css('.p-content__inner p').each do |p|
+      @all_page << { cadent: p.text[/(\d{2}\.\d{2}\.\d{4})/].gsub(/(|)/,''), url: p.css('a')[0][:href] }
     end
   end
   def get_all_votes

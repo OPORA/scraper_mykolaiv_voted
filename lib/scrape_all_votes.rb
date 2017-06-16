@@ -8,31 +8,28 @@ require_relative 'get_mps'
 class GetAllVotes
   def self.votes(url, cadent)
 
-     file_path = "http://www.lutskrada.gov.ua#{url}"
+     file_path = "https://mkrada.gov.ua#{url}"
      p file_path
+     urif = URI.encode(file_path.gsub(/%20/,' '))
      file_names = []
-     file_name = "#{File.dirname(__FILE__)}/../files/download/#{Base32.encode(file_path)}"
+     file_name = "#{File.dirname(__FILE__)}/../files/download/#{cadent}"
      if (!File.exists?(file_name) || File.zero?(file_name))
           puts ">>>>  File not found, Downloading...."
-          File.write(file_name, open(file_path).read)
+          File.write(file_name, open(urif).read)
           p "end load"
      end
-      `unzip -o -O cp866 #{file_name} -d #{file_name}_D/`
+      `unrar e #{file_name} #{file_name}_D/ -y`
       files = `cd #{file_name}_D && ls`
 
       files.split(/\n/).each do |d|
-         `cd #{file_name}_D/#{d.gsub(/\s/,'\ ')} && ls`.split(/\n/).each do |rtf|
-            next if rtf == "AllGOLOS.rtf"
-            file_names << "#{file_name}_D/#{d}/#{rtf}"
-         end
+            file_names << "#{file_name}_D/#{d}"
       end
      file_names.each_with_index do |file_name, i|
-
         ReadFile.new.rtf(file_name).each do |vot|
           p vot
-           event = VoteEvent.first(name: vot[:name], date_vote: vot[:datetime], date_caden: cadent, rada_id: 3, option: vot[:res])
+           event = VoteEvent.first(name: vot[:name], date_vote: vot[:datetime], date_caden: cadent, rada_id: 5, option: vot[:res])
            if event.nil?
-             events = VoteEvent.new(name: vot[:name], date_vote: vot[:datetime], number: i + 1, date_caden: cadent, rada_id: 3, option: vot[:res])
+             events = VoteEvent.new(name: vot[:name], date_vote: vot[:datetime], number: i + 1, date_caden: cadent, rada_id: 5, option: vot[:res])
              events.date_created = Date.today
              events.save
            else
@@ -41,7 +38,7 @@ class GetAllVotes
            end
            vot[:voteds].each do |v|
              next if v.empty?
-             next if v.first == "міський голова"
+             # next if v.first == "міський голова"
              vote = events.votes.new
              vote.voter_id = $all_mp.serch_mp(v.first)
              vote.result = short_voted_result(v.last)
