@@ -15,7 +15,7 @@ class GetAllVotes
      file_name = "#{File.dirname(__FILE__)}/../files/download/#{cadent}"
      if (!File.exists?(file_name) || File.zero?(file_name))
           puts ">>>>  File not found, Downloading...."
-          File.write(file_name, open(urif).read)
+          File.write(file_name, open(urif, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE).read)
           p "end load"
      end
       `unrar e #{file_name} #{file_name}_D/ -y`
